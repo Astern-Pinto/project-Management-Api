@@ -1,4 +1,45 @@
 import Mailgen from "mailgen";
+import nodemailer from "nodemailer";
+
+
+const emailSender = async (options) =>{
+    const mailGenerator = new Mailgen({
+        theme:"default",
+        product: {
+            name:"Project Manager",
+            link:"https://project-manager.com"
+        }
+    });
+
+    const textualemail = mailGenerator.generatePlaintext(options.mailContent)
+    const emailHtml = mailGenerator.generate(options.mailContent)
+
+
+    const transporter = nodemailer.createTransport({
+        host: process.env.MAILTRAP_SMTP_HOST,
+        port: process.env.MAILTRAP_SMTP_PORT,
+        auth:{
+            user: process.env.MAILTRAP_SMTP_USER,
+            pass: process.env.MAILTRAP_SMTP_PASS
+        }
+    });
+
+    const email = {
+        from:"asternp26@gmail.com",
+        to: options.email,
+        subject: options.subject,
+        text: textualemail,
+        html: emailHtml
+    };
+
+
+    try {
+        await transporter.sendMail(email)
+    } catch (error) {
+        console.error("❌Error sending email:", error);
+    }
+
+}
 
 
 
@@ -39,4 +80,4 @@ const forgotPasswordMailContent = function(username,passwwordResetUrl){
 }
 
 
-export {emailVerificationMailContent,forgotPasswordMailContent};
+export {emailVerificationMailContent,forgotPasswordMailContent,emailSender};
